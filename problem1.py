@@ -1,4 +1,6 @@
 import numpy as np
+from sklearn import metrics,neighbors
+import sklearn
 from collections import Counter
 #-------------------------------------------------------------------------
 '''
@@ -30,7 +32,7 @@ def Terms_and_Conditions():
     '''
     #****************************************
     ## CHANGE CODE HERE
-    Read_and_Agree = False  #if you have read and agree with the term above, change "False" to "True".
+    Read_and_Agree = True  #if you have read and agree with the term above, change "False" to "True".
     #****************************************
     return Read_and_Agree
  
@@ -60,16 +62,8 @@ def compute_distance(Xtrain, Xtest):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
-
-
-
-
-
-
-
-
+    D = sklearn.metrics.pairwise.euclidean_distances(Xtest,Xtrain)
+    
     #########################################
     return D 
 
@@ -95,24 +89,24 @@ def k_nearest_neighbor(Xtrain, Ytrain, Xtest, K = 3):
     #########################################
     ## INSERT YOUR CODE HERE
 
-    # nubmer of testing instances
+    # number of testing instances
+    numtest = len(Xtest)
 
 
     # compute distances between test set and training set
+    
+    D = compute_distance(Xtrain,Xtest)
 
+    smallest = np.array([np.argpartition(row,K-1)[:K] for row in D])
 
+    Ytest = []
+    print(smallest)
+    for s in smallest:
+        idx = s[K-2]
+        print("i",idx)
+        Ytest.append(Ytrain[idx])
 
-
-
-
-
-
-
-
-
-
-
-
+    Ytest = np.array(Ytest)
     #########################################
     return Ytest 
 

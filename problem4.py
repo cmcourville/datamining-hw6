@@ -3,6 +3,8 @@ import numpy as np
 #-----------------------------------------------------------------------
 # You could re-use your code in Problem 3.
 import problem3 as sr # sr = softmax regression 
+import problem2 as lr # lr = logistic regression
+import problem3 as sr # sr = softmax regression 
 #-------------------------------------------------------------------------
 '''
     Problem 4: two-layer fully connected neural network. 
@@ -98,7 +100,7 @@ def compute_z1(x,W1,b1):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    z1 = sr.compute_z(x,W1,b1)
 
     #########################################
     return z1
@@ -119,11 +121,8 @@ def compute_a1(z1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
+    a1 = np.array([[lr.compute_a(z)] for z in z1])
+    a1 = np.asmatrix(a1)
 
     #########################################
     return a1 
@@ -141,7 +140,8 @@ def compute_z2(a1,W2,b2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    
+    z2 = W2 @ a1 + b2
 
 
     #########################################
@@ -163,8 +163,7 @@ def compute_a2(z2):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
+    a2 = sr.compute_a(z2)
     #########################################
     return a2 
 
@@ -190,10 +189,13 @@ def forward(x, W1, b1, W2, b2):
     ## INSERT YOUR CODE HERE
     # first layer
 
-
-
+    z1 = compute_z1(x,W1,b1)
+    a1 = compute_a1(z1)
+                    
     # second layer
 
+    z2 = compute_z2(a1,W2,b2)
+    a2 = compute_a2(z2)
 
     #########################################
     return z1, a1, z2, a2
@@ -216,7 +218,7 @@ def compute_dL_da2(a2, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dL_da2 = sr.compute_dL_da(a2,y)
     #########################################
     return dL_da2
 
@@ -232,7 +234,7 @@ def compute_da2_dz2(a2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    da2_dz2 = sr.compute_da_dz(a2)
     #########################################
     return da2_dz2 
 
@@ -249,7 +251,8 @@ def compute_dz2_dW2(a1,c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    
+    dz2_dW2 = sr.compute_dz_dW(a1,c)
     #########################################
     return dz2_dW2
 
@@ -266,7 +269,8 @@ def compute_dz2_db2(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dz2_db2 = np.array([[1.] for i in range(c)])
+    dz2_db2 = np.asmatrix(dz2_db2)
     #########################################
     return dz2_db2
 
@@ -285,7 +289,7 @@ def compute_dz2_da1(W2):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    dz2_da1 = W2
 
     #########################################
     return dz2_da1 
@@ -305,7 +309,10 @@ def compute_da1_dz1(a1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    a = np.squeeze(np.asarray(a1))
+    
+    da1_dz1 = [[ai*(1-ai)] for ai in a]
+    da1_dz1 = np.asmatrix(da1_dz1)
 
 
     #########################################
@@ -325,7 +332,8 @@ def compute_dz1_dW1(x,h):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dz1_dW1 = np.repeat(x,h,axis=1)
+    dz1_dW1 = np.asmatrix(dz1_dW1.T)
     #########################################
     return dz1_dW1
 
@@ -343,7 +351,7 @@ def compute_dz1_db1(h):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    dz1_db1 = np.asmatrix(np.ones([h]))
 
     #########################################
     return dz1_db1
@@ -369,21 +377,21 @@ def backward(x,y,a1,a2,W2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    c = a2.shape[0]
+    h = a1.shape[0]
 
     # 2nd layer
-
-
-
-
+    
+    dL_da2 = compute_dL_da2(a2,y)
+    da2_dz2 = compute_da2_dz2(a2)
+    dz2_dW2 = compute_dz2_dW2(a1,c)
+    dz2_db2 = compute_dz2_db2(c)
 
     # 1st layer
-
-
-
-
-
+    dz2_da1 = compute_dz2_da1(W2)
+    da1_dz1 = compute_da1_dz1(a1)
+    dz1_dW1 = compute_dz1_dW1(x,h)
+    dz1_db1 = compute_dz1_db1(h)
     #########################################
     return dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1, dz1_dW1, dz1_db1
 
@@ -404,9 +412,7 @@ def compute_dL_da1(dL_dz2,dz2_da1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
+    dL_da1 = dL_dz2.T * dz2_da1
     #########################################
     return dL_da1
 
@@ -425,7 +431,11 @@ def compute_dL_dz1(dL_da1,da1_dz1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    da = np.squeeze(np.asarray(da1_dz1))
+    dL = np.squeeze(np.asarray(dL_da1))
+    
+    dL_dz1 = da*dL
+    dL_dz1 = np.asmatrix(dL_dz1).T
 
 
     #########################################

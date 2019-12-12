@@ -1,4 +1,6 @@
 import math
+from scipy.stats import logistic
+from sklearn.metrics import log_loss
 import numpy as np
 #-------------------------------------------------------------------------
 '''
@@ -59,8 +61,7 @@ def compute_z(x,w,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    z = w.dot(x) + b
 
     #########################################
     return z 
@@ -80,12 +81,14 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
-
+    # a = logistic.cdf(z)
+    try:
+        a = float(1.0 / (1.0 + np.exp(-z)))
+    except: # deal with overflow
+        if (z < 0):
+            a = 0
+        else:
+            a = 1
     #########################################
     return a
 
@@ -107,11 +110,16 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
+    L = 0
+    if y==0 and a!=1:
+        L = -np.log(1-a)
+    if y==0 and a==1:
+        L = 1e7
+    if y==1 and a!=0:
+        L = -np.log(a)
+    if y==1 and a==0:
+        L = 1e7
+    # print(L)
 
     #########################################
     return L 
@@ -136,8 +144,9 @@ def forward(x,y,w,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    z = compute_z (x,w,b)
+    a = compute_a(z)
+    L = compute_L (a,y)
 
     #########################################
     return z, a, L 
@@ -164,14 +173,19 @@ def compute_dL_da(a, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
-
-
-
+    # print("This is a ", a)
+    # print("this is y:", y)
+    if y==0:
+        if a!=1:
+            dL_da = 1 / (1-a)
+        if a==1:
+            dL_da = 1e7
+    if y==1:
+        if a!=0:
+            dL_da = -1 / a
+        if a==0:
+            dL_da = -1e6
+    # print(dL_da)    
     #########################################
     return dL_da 
 
@@ -193,8 +207,8 @@ def compute_da_dz(a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    da_dz = 1-a
+    da_dz = a* da_dz
 
     #########################################
     return da_dz 
@@ -217,8 +231,7 @@ def compute_dz_dw(x):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    dz_dw = x
 
     #########################################
     return dz_dw
@@ -237,6 +250,7 @@ def compute_dz_db():
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    dz_db = 1
 
     #########################################
     return dz_db
@@ -266,9 +280,10 @@ def backward(x,y,a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
+    dL_da = compute_dL_da(a,y)
+    da_dz = compute_da_dz(a)
+    dz_dw = compute_dz_dw(x)
+    dz_db = compute_dz_db()
 
     #########################################
     return dL_da, da_dz, dz_dw, dz_db 
@@ -293,8 +308,7 @@ def compute_dL_dw(dL_da, da_dz, dz_dw):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    dL_dw = dL_da * da_dz * dz_dw
 
     #########################################
     return dL_dw
@@ -317,8 +331,7 @@ def compute_dL_db(dL_da, da_dz, dz_db):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    dL_db = dL_da * da_dz * dz_db
 
     #########################################
     return dL_db 
@@ -346,8 +359,7 @@ def update_w(w, dL_dw, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    w = w - (alpha*dL_dw)
 
     #########################################
     return w
@@ -370,12 +382,11 @@ def update_b(b, dL_db, alpha=0.001):
     '''
     
     #########################################
-    ## INSERT YOUR CODE HERE
-
-
+    ## INSERT YOUR CODE 
+    b = b - (alpha*dL_db)
 
     #########################################
-    return  b 
+    return b 
 
 
     ''' TEST: Now you can test the correctness of your code above by typing `nosetests -v test2.py:test_update_b' in the terminal.  '''
@@ -387,7 +398,7 @@ def update_b(b, dL_db, alpha=0.001):
 def train(X, Y, alpha=0.001, n_epoch=100):
     '''
        Given a training dataset, train the logistic regression model by iteratively updating the weights w and bias b using the gradients computed over each data instance. 
-We repeat n_epoch passes over all the training instances.
+        We repeat n_epoch passes over all the training instances.
         Input:
             X: the feature matrix of training instances, a float numpy matrix of shape (n by p). Here n is the number of data instance in the training set, p is the number of features/dimensions.
             Y: the labels of training instance, a numpy integer vector of length n. The values can be 0 or 1.
@@ -406,17 +417,18 @@ We repeat n_epoch passes over all the training instances.
             #########################################
             ## INSERT YOUR CODE HERE
             # Forward pass: compute the logit, sigmoid activation and cross_entropy loss function.
-
+            z, a, L = forward(x, y, w, b)
 
             # Back propagation: compute local gradients 
-
+            dL_da, da_dz, dz_dw, dz_db = backward(x, y, a)
 
             # compute the global gradients using chain rule 
-
-
+            dL_dw = compute_dL_dw(dL_da, da_dz, dz_dw)
+            dL_db = compute_dL_db(dL_da, da_dz, dz_db)
 
             # update the parameters w and b
-
+            w = update_w(w, dL_dw, alpha)
+            b = update_b(b, dL_db, alpha)
 
             #########################################
     return w, b
@@ -446,11 +458,19 @@ def predict(Xtest, w, b):
     Y = np.zeros(n) 
     P = np.zeros(n)  
     for i, x in enumerate(Xtest):
-        #########################################
-        ## INSERT YOUR CODE HERE
+        ########################################
+        # INSERT YOUR CODE HERE
+        x = x.T
+        z = compute_z(x,w,b)
+        a = compute_a(z)
 
-
-
+        if (z > 0):
+            Y[i] = 1
+        else:
+            Y[i] = 0
+        P[i] = a
+        
+    
         #########################################
     return Y, P
 

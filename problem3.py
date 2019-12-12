@@ -64,9 +64,11 @@ def compute_z(x,W,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    #w = 2,3
+    #b= 2,1 
+    #x = 3,1
 
-
-
+    z = W * x  + b
     #########################################
     return z 
 
@@ -82,14 +84,34 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    zsum = 0
+    b = z.max()
+    for ziz in z:
+        zi = ziz[0,0]
+        # if (zi > 0):
+        #     b = 400
+        # elif (zi < 0):
+        #     b = -
+        if (zi-b <= -900.):
+            zsum += 0
+        else:
+            zsum += np.exp(zi - b)
 
-
-
-
-
-
-
-
+    a = []
+    for i in range(len(z)):
+        # if (z[i,0] > 0):
+        #     b =  400
+        # elif(z[i,0] < 0):
+        #     b = -400
+        if (z[i,0]-b <= -900.):
+            a.append(0.0)
+        else:
+            a.append(np.exp(z[i,0] - b)/zsum)
+        
+    a = np.array(a)
+    a = np.asmatrix(a.T)
+    a = a.T
+   
     #########################################
     return a
 
@@ -106,8 +128,14 @@ def compute_L(a,y):
     #########################################
     ## INSERT YOUR CODE HERE
 
+    L = 0.
+    v = [a[i,0] for i in range(len(a))]
+    if (v[y] > 0.):
+        L -= np.log(v[y])
+    else:
+        L += 1e6
 
-
+    L = float(L)
 
     #########################################
     return L 
@@ -128,8 +156,10 @@ def forward(x,y,W,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    
+    z = compute_z(x,W,b)
+    a = compute_a(z)
+    L = compute_L(a,y)
 
     #########################################
     return z, a, L 
@@ -154,13 +184,18 @@ def compute_dL_da(a, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE     
-
-
-
-
-
-
-
+    v = [a[i,0] for i in range(len(a))]
+    dL_da = []
+    for i in range(len(v)):
+        if (i == y):
+            if (v[i] == 0.):
+                dL_da.append([-1e7])
+            else:
+                dL_da.append([-1/v[i]])
+        else:
+            dL_da.append([0.0])
+    dL_da = np.array(dL_da)
+    dL_da = np.asmatrix(dL_da)
     #########################################
     return dL_da 
 
@@ -179,11 +214,16 @@ def compute_da_dz(a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
+    da_dz = np.zeros([len(a),len(a)])
+    for i in range(da_dz.shape[0]):
+        for j in range(da_dz.shape[1]):
+            if i==j:
+                da_dz[i,j] = a[i] * (1-a[i])
+            else:
+                da_dz[i,j] = -(a[i] * a[j])
 
-
-
-
-
+    da_dz = np.asmatrix(da_dz)
 
     #########################################
     return da_dz 
@@ -202,9 +242,15 @@ def compute_dz_dW(x,c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
+    dz_dW = np.zeros([c,len(x)])
+   
+    for i in range(c):
+        for j in range(len(x)):
+            dz_dW[i,j] = x[j]
+    
+   
+    dz_dW = np.asmatrix(dz_dW)
+    
 
     #########################################
     return dz_dW
@@ -225,9 +271,8 @@ def compute_dz_db(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
+    dz_db = np.array([[1.] for i in range(c)])
+    dz_db = np.asmatrix(dz_db.T)
     #########################################
     return dz_db
 
@@ -256,10 +301,11 @@ def backward(x,y,a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
+    c  = len(list(a))
+    dL_da = compute_dL_da(a,y)
+    da_dz = compute_da_dz(a)
+    dz_dW = compute_dz_dW(x,c)
+    dz_db = (compute_dz_db(len(a))).T
 
     #########################################
     return dL_da, da_dz, dz_dW, dz_db
@@ -279,7 +325,8 @@ def compute_dL_dz(dL_da,da_dz):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+   
+    dL_dz = dL_da * da_dz
 
 
     #########################################
@@ -304,11 +351,14 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
+    r = len(dL_dz)
+    c = dz_dW.shape[1]
+    dL_dW = np.zeros([r,c])
+    for i in range(r):
+        for j in range(c):
+            dL_dW[i,j] = dL_dz[i] * dz_dW[i,j]
     #########################################
-    return dL_dW
+    return np.asmatrix(dL_dW)
 
 
 
@@ -329,8 +379,13 @@ def compute_dL_db(dL_dz,dz_db):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    z = np.squeeze(np.asarray(dz_db))
+    L = np.squeeze(np.asarray(dL_dz))
+    
+    dL_db = z*L
+    dL_db = [[d] for d in dL_db]
 
-
+    dL_db = np.asmatrix(dL_db)
 
     #########################################
     return dL_db 
@@ -355,7 +410,7 @@ def update_W(W, dL_dW, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
-
+    W = W - (alpha*dL_dW)
 
 
     #########################################
@@ -379,7 +434,7 @@ def update_b(b, dL_db, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
-
+    b = b - (alpha*dL_db)
 
 
     #########################################
@@ -416,7 +471,19 @@ def train(X, Y, alpha=0.01, n_epoch=100):
             #########################################
             ## INSERT YOUR CODE HERE
             # Forward pass: compute the logits, softmax and cross_entropy 
+            z, a, L = forward(x,y,W,b)
 
+            # Back Propagation: compute local gradients 
+            dL_da, da_dz, dz_dW, dz_db = backward(x,y,a)
+
+            # compute the global gradients using chain rule 
+            dL_dz = compute_dL_dz(dL_da,da_dz)
+            dL_dW = compute_dL_dW(dL_dz,dz_dW)
+            dL_db = compute_dL_db(dL_dz,dz_db)
+
+            # update the parameters using gradient descent
+            W = update_W(W,dL_dW,alpha)
+            b = update_b(b,dL_db,alpha)
 
             # Back Propagation: compute local gradients 
 
@@ -453,7 +520,14 @@ def predict(Xtest, W, b):
         x = x.T # convert to column vector
         #########################################
         ## INSERT YOUR CODE HERE
+        z = compute_z(x,W,b)
+        a = compute_a(z)
 
+        v = [z[m,0] for m in range(len(z))]
+        Y[i] = v.index(max(v))
+        
+        for j in range(c):
+            P[i,j] = a[j]
 
 
         #########################################
