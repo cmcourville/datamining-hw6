@@ -90,22 +90,14 @@ def k_nearest_neighbor(Xtrain, Ytrain, Xtest, K = 3):
     ## INSERT YOUR CODE HERE
 
     # number of testing instances
-    numtest = len(Xtest)
-
-
+    inst = len(Xtest)
     # compute distances between test set and training set
-    
-    D = compute_distance(Xtrain,Xtest)
-
-    smallest = np.array([np.argpartition(row,K-1)[:K] for row in D])
-
+    dist = compute_distance(Xtrain,Xtest)
+    order = np.array([np.argpartition(row,K-1)[:K] for row in dist])
     Ytest = []
-    print(smallest)
-    for s in smallest:
+    for s in order:
         idx = s[K-2]
-        print("i",idx)
         Ytest.append(Ytrain[idx])
-
     Ytest = np.array(Ytest)
     #########################################
     return Ytest 
