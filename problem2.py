@@ -61,6 +61,7 @@ def compute_z(x,w,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     z = w.dot(x) + b
 
     #########################################
@@ -81,14 +82,15 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    # a = logistic.cdf(z)
+
     try:
         a = float(1.0 / (1.0 + np.exp(-z)))
-    except: # deal with overflow
+    except:
         if (z < 0):
             a = 0
         else:
             a = 1
+
     #########################################
     return a
 
@@ -110,16 +112,18 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     L = 0
-    if y==0 and a!=1:
-        L = -np.log(1-a)
-    if y==0 and a==1:
-        L = 1e7
-    if y==1 and a!=0:
-        L = -np.log(a)
-    if y==1 and a==0:
-        L = 1e7
-    # print(L)
+    if y==0:
+        if a!=1 :
+            L = -np.log(1-a)
+        if a==1:
+            L = 1e7
+    if y==1:
+        if a!=0:
+            L = -np.log(a)
+        if a==0:
+            L = 1e7
 
     #########################################
     return L 
@@ -144,6 +148,7 @@ def forward(x,y,w,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     z = compute_z (x,w,b)
     a = compute_a(z)
     L = compute_L (a,y)
@@ -175,6 +180,7 @@ def compute_dL_da(a, y):
     ## INSERT YOUR CODE HERE
     # print("This is a ", a)
     # print("this is y:", y)
+    
     if y==0:
         if a!=1:
             dL_da = 1 / (1-a)
@@ -185,7 +191,7 @@ def compute_dL_da(a, y):
             dL_da = -1 / a
         if a==0:
             dL_da = -1e6
-    # print(dL_da)    
+       
     #########################################
     return dL_da 
 
@@ -207,8 +213,8 @@ def compute_da_dz(a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    da_dz = 1-a
-    da_dz = a* da_dz
+
+    da_dz =  a * (1-a)
 
     #########################################
     return da_dz 
@@ -231,6 +237,7 @@ def compute_dz_dw(x):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     dz_dw = x
 
     #########################################
@@ -250,6 +257,7 @@ def compute_dz_db():
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     dz_db = 1
 
     #########################################
@@ -280,6 +288,7 @@ def backward(x,y,a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     dL_da = compute_dL_da(a,y)
     da_dz = compute_da_dz(a)
     dz_dw = compute_dz_dw(x)
@@ -308,6 +317,7 @@ def compute_dL_dw(dL_da, da_dz, dz_dw):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     dL_dw = dL_da * da_dz * dz_dw
 
     #########################################
@@ -331,6 +341,7 @@ def compute_dL_db(dL_da, da_dz, dz_db):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     dL_db = dL_da * da_dz * dz_db
 
     #########################################
@@ -359,6 +370,7 @@ def update_w(w, dL_dw, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
+    
     w = w - (alpha*dL_dw)
 
     #########################################
@@ -383,6 +395,7 @@ def update_b(b, dL_db, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE 
+    
     b = b - (alpha*dL_db)
 
     #########################################
@@ -417,6 +430,7 @@ def train(X, Y, alpha=0.001, n_epoch=100):
             #########################################
             ## INSERT YOUR CODE HERE
             # Forward pass: compute the logit, sigmoid activation and cross_entropy loss function.
+            
             z, a, L = forward(x, y, w, b)
 
             # Back propagation: compute local gradients 
@@ -460,17 +474,16 @@ def predict(Xtest, w, b):
     for i, x in enumerate(Xtest):
         ########################################
         # INSERT YOUR CODE HERE
+        
         x = x.T
         z = compute_z(x,w,b)
         a = compute_a(z)
-
         if (z > 0):
             Y[i] = 1
         else:
             Y[i] = 0
         P[i] = a
         
-    
         #########################################
     return Y, P
 
