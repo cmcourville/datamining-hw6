@@ -218,7 +218,9 @@ def compute_dL_da2(a2, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    dL_da2 = sr.compute_dL_da(a2,y)
+    
+    dL_da2 = sr.compute_dL_da(a2,y).T
+    
     #########################################
     return dL_da2
 
@@ -456,17 +458,36 @@ def compute_gradients(dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1, dz1_d
     
     #########################################
     ## INSERT YOUR CODE HERE
-
-    # the 2nd layer 
-
-
-
-
-    # the 1st layer 
-
-
-
-
+    # # the 2nd layer
+    La2 = np.squeeze(np.asarray(dL_da2))
+    az2 = np.squeeze(np.asarray(da2_dz2))
+    zW2 = np.squeeze(np.asarray(dz2_dW2))
+    
+    dL_dW2 = (La2 * az2)
+    dL_dW2 = np.asmatrix(dL_dW2)
+    dL_dW2 = dL_dW2 @ zW2
+    
+    zb2 = np.squeeze(np.asarray(dz2_db2))    
+    dL_db2 = (La2 * az2)
+    dL_db2 = np.asmatrix(dL_db2)
+    dL_db2 = dL_db2 @ zb2
+    dL_db2 = dL_db2.T
+    
+    # the 1st layer
+    za1 = np.squeeze(np.asarray(dz2_da1))
+    az1 = np.squeeze(np.asarray(da1_dz1))
+    zW1 = np.squeeze(np.asarray(dz1_dW1))
+    
+    dL_dW1 = zW1
+    dL_dW1 = np.asmatrix(dL_dW1)
+    dL_dW1 = dL_dW1 @ La2
+    
+    # print("->",dL_dW1.shape)
+    
+    zb1 = np.squeeze(np.asarray(dz1_db1))    
+    dL_db1 = (za1 * az1)
+    dL_db1 = np.asmatrix(dL_db1)
+    dL_db1 = dL_db1 @ zb1
 
     #########################################
 

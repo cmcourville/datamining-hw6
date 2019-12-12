@@ -195,7 +195,8 @@ def compute_dL_da(a, y):
         else:
             dL_da.append([0.0])
     dL_da = np.array(dL_da)
-    dL_da = np.asmatrix(dL_da)
+    dL_da = np.asmatrix(dL_da).T
+    
     #########################################
     return dL_da 
 
@@ -242,16 +243,16 @@ def compute_dz_dW(x,c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    dz_dW = np.zeros([c,len(x)])
-   
-    for i in range(c):
-        for j in range(len(x)):
-            dz_dW[i,j] = x[j]
+    # r = len(x)
+    # dz_dW = np.zeros([c,r])
+    # for i in range(c):
+    #     for j in range(r):
+    #         dz_dW[i,j] = x[j]
+    # dz_dW = dz_dW.reshape((((int)c)*r)/2, 2)
+    # dz_dW= np.asmatrix(dz_dW)
     
-   
-    dz_dW = np.asmatrix(dz_dW)
-    
-
+    # print(c, r, dz_dW)
+    dz_dW=0
     #########################################
     return dz_dW
 
