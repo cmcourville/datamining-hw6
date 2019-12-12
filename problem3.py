@@ -64,11 +64,9 @@ def compute_z(x,W,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    #w = 2,3
-    #b= 2,1 
-    #x = 3,1
 
     z = W * x  + b
+    
     #########################################
     return z 
 
@@ -84,33 +82,26 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    zsum = 0
+    
+    z_sum = 0
     b = z.max()
-    for ziz in z:
-        zi = ziz[0,0]
-        # if (zi > 0):
-        #     b = 400
-        # elif (zi < 0):
-        #     b = -
-        if (zi-b <= -900.):
-            zsum += 0
+    for _z in z:
+        z_i = _z[0,0]
+        if (z_i-b <= -900.):
+            z_sum += 0
         else:
-            zsum += np.exp(zi - b)
+            z_sum += np.exp(z_i - b)
 
     a = []
     for i in range(len(z)):
-        # if (z[i,0] > 0):
-        #     b =  400
-        # elif(z[i,0] < 0):
-        #     b = -400
         if (z[i,0]-b <= -900.):
             a.append(0.0)
         else:
-            a.append(np.exp(z[i,0] - b)/zsum)
+            a.append(np.exp(z[i,0] - b)/z_sum)
         
     a = np.array(a)
-    a = np.asmatrix(a.T)
-    a = a.T
+    a = np.asmatrix(a.T).T
+    
    
     #########################################
     return a
@@ -129,9 +120,9 @@ def compute_L(a,y):
     ## INSERT YOUR CODE HERE
 
     L = 0.
-    v = [a[i,0] for i in range(len(a))]
-    if (v[y] > 0.):
-        L -= np.log(v[y])
+    c = [a[i,0] for i in range(len(a))]
+    if (c[y] > 0.):
+        L -= np.log(c[y])
     else:
         L += 1e6
 
@@ -183,7 +174,8 @@ def compute_dL_da(a, y):
                    The i-th element dL_da[0,i] represents the partial gradient of the loss function w.r.t. the i-th activation a[i]:  d_L / d_a[i].
     '''
     #########################################
-    ## INSERT YOUR CODE HERE     
+    ## INSERT YOUR CODE HERE    
+     
     v = [a[i,0] for i in range(len(a))]
     dL_da = []
     for i in range(len(v)):
@@ -272,8 +264,10 @@ def compute_dz_db(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     dz_db = np.array([[1.] for i in range(c)])
     dz_db = np.asmatrix(dz_db.T)
+    
     #########################################
     return dz_db
 
@@ -302,6 +296,7 @@ def backward(x,y,a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     c  = len(list(a))
     dL_da = compute_dL_da(a,y)
     da_dz = compute_da_dz(a)
@@ -329,7 +324,6 @@ def compute_dL_dz(dL_da,da_dz):
    
     dL_dz = dL_da * da_dz
 
-
     #########################################
     return dL_dz
 
@@ -352,14 +346,11 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    r = len(dL_dz)
-    c = dz_dW.shape[1]
-    dL_dW = np.zeros([r,c])
-    for i in range(r):
-        for j in range(c):
-            dL_dW[i,j] = dL_dz[i] * dz_dW[i,j]
+
+    dL_dW = 0
+    
     #########################################
-    return np.asmatrix(dL_dW)
+    return dL_dW
 
 
 
@@ -380,6 +371,7 @@ def compute_dL_db(dL_dz,dz_db):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     z = np.squeeze(np.asarray(dz_db))
     L = np.squeeze(np.asarray(dL_dz))
     
@@ -411,8 +403,8 @@ def update_W(W, dL_dW, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
+    
     W = W - (alpha*dL_dW)
-
 
     #########################################
     return W
@@ -435,8 +427,8 @@ def update_b(b, dL_db, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
+    
     b = b - (alpha*dL_db)
-
 
     #########################################
     return b 
@@ -518,9 +510,9 @@ def predict(Xtest, W, b):
     Y = np.zeros(n) # initialize as all zeros
     P = np.asmatrix(np.zeros((n,c)))  
     for i, x in enumerate(Xtest):
-        x = x.T # convert to column vector
         #########################################
         ## INSERT YOUR CODE HERE
+        x = x.T 
         z = compute_z(x,W,b)
         a = compute_a(z)
 
@@ -529,7 +521,6 @@ def predict(Xtest, W, b):
         
         for j in range(c):
             P[i,j] = a[j]
-
 
         #########################################
     return Y, P 

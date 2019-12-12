@@ -177,10 +177,8 @@ def compute_dL_da(a, y):
             dL_da: the local gradient of the loss function w.r.t. the activation, a float scalar value.
     '''
     #########################################
-    ## INSERT YOUR CODE HERE
-    # print("This is a ", a)
-    # print("this is y:", y)
-    
+    ## INSERT YOUR CODE HERE  
+     
     if y==0:
         if a!=1:
             dL_da = 1 / (1-a)
@@ -476,13 +474,13 @@ def predict(Xtest, w, b):
         # INSERT YOUR CODE HERE
         
         x = x.T
-        z = compute_z(x,w,b)
-        a = compute_a(z)
-        if (z > 0):
+        comp_z = compute_z(x,w,b)
+        comp_a = compute_a(comp_z)
+        if (comp_z > 0):
             Y[i] = 1
         else:
             Y[i] = 0
-        P[i] = a
+        P[i] = comp_a
         
         #########################################
     return Y, P

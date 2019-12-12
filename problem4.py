@@ -121,6 +121,7 @@ def compute_a1(z1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     a1 = np.array([[lr.compute_a(z)] for z in z1])
     a1 = np.asmatrix(a1)
 
@@ -143,7 +144,6 @@ def compute_z2(a1,W2,b2):
     
     z2 = W2 @ a1 + b2
 
-
     #########################################
     return z2
 
@@ -164,6 +164,7 @@ def compute_a2(z2):
     ## INSERT YOUR CODE HERE
 
     a2 = sr.compute_a(z2)
+
     #########################################
     return a2 
 
@@ -236,7 +237,9 @@ def compute_da2_dz2(a2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     da2_dz2 = sr.compute_da_dz(a2)
+    
     #########################################
     return da2_dz2 
 
@@ -255,6 +258,7 @@ def compute_dz2_dW2(a1,c):
     ## INSERT YOUR CODE HERE
     
     dz2_dW2 = sr.compute_dz_dW(a1,c)
+
     #########################################
     return dz2_dW2
 
@@ -271,8 +275,10 @@ def compute_dz2_db2(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     dz2_db2 = np.array([[1.] for i in range(c)])
     dz2_db2 = np.asmatrix(dz2_db2)
+    
     #########################################
     return dz2_db2
 
@@ -311,11 +317,10 @@ def compute_da1_dz1(a1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    a = np.squeeze(np.asarray(a1))
-    
-    da1_dz1 = [[ai*(1-ai)] for ai in a]
-    da1_dz1 = np.asmatrix(da1_dz1)
 
+    stuff = np.squeeze(np.asarray(a1))
+    da1_dz1 = [[ai*(1-ai)] for ai in stuff]
+    da1_dz1 = np.asmatrix(da1_dz1)
 
     #########################################
     return da1_dz1 
@@ -333,9 +338,11 @@ def compute_dz1_dW1(x,h):
                    The (i,j)-th element represents the partial gradient of the i-th logit (z1[i]) w.r.t. the weight W1[i,j]:   d_z1[i] / d_W1[i,j]
     '''
     #########################################
-    ## INSERT YOUR CODE HERE
+    ## INSERT YOUR CODE 
+    
     dz1_dW1 = np.repeat(x,h,axis=1)
     dz1_dW1 = np.asmatrix(dz1_dW1.T)
+    
     #########################################
     return dz1_dW1
 
@@ -379,11 +386,10 @@ def backward(x,y,a1,a2,W2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     c = a2.shape[0]
     h = a1.shape[0]
-
     # 2nd layer
-    
     dL_da2 = compute_dL_da2(a2,y)
     da2_dz2 = compute_da2_dz2(a2)
     dz2_dW2 = compute_dz2_dW2(a1,c)
@@ -414,7 +420,9 @@ def compute_dL_da1(dL_dz2,dz2_da1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    
     dL_da1 = dL_dz2.T * dz2_da1
+
     #########################################
     return dL_da1
 
@@ -433,12 +441,12 @@ def compute_dL_dz1(dL_da1,da1_dz1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     da = np.squeeze(np.asarray(da1_dz1))
     dL = np.squeeze(np.asarray(dL_da1))
     
     dL_dz1 = da*dL
     dL_dz1 = np.asmatrix(dL_dz1).T
-
 
     #########################################
     return dL_dz1
@@ -458,36 +466,8 @@ def compute_gradients(dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1, dz1_d
     
     #########################################
     ## INSERT YOUR CODE HERE
-    # # the 2nd layer
-    La2 = np.squeeze(np.asarray(dL_da2))
-    az2 = np.squeeze(np.asarray(da2_dz2))
-    zW2 = np.squeeze(np.asarray(dz2_dW2))
-    
-    dL_dW2 = (La2 * az2)
-    dL_dW2 = np.asmatrix(dL_dW2)
-    dL_dW2 = dL_dW2 @ zW2
-    
-    zb2 = np.squeeze(np.asarray(dz2_db2))    
-    dL_db2 = (La2 * az2)
-    dL_db2 = np.asmatrix(dL_db2)
-    dL_db2 = dL_db2 @ zb2
-    dL_db2 = dL_db2.T
-    
-    # the 1st layer
-    za1 = np.squeeze(np.asarray(dz2_da1))
-    az1 = np.squeeze(np.asarray(da1_dz1))
-    zW1 = np.squeeze(np.asarray(dz1_dW1))
-    
-    dL_dW1 = zW1
-    dL_dW1 = np.asmatrix(dL_dW1)
-    dL_dW1 = dL_dW1 @ La2
-    
-    # print("->",dL_dW1.shape)
-    
-    zb1 = np.squeeze(np.asarray(dz1_db1))    
-    dL_db1 = (za1 * az1)
-    dL_db1 = np.asmatrix(dL_db1)
-    dL_db1 = dL_db1 @ zb1
+
+    dL_dW2, dL_db2, dL_dW1, dL_db1 =0
 
     #########################################
 
@@ -541,8 +521,8 @@ def train(X, Y,h=3,  alpha=0.01, n_epoch=100):
 
 
             # update the paramters using gradient descent
-
-
+            W1, b1, W2, b2 = 0
+            
 
 
             #########################################
@@ -567,7 +547,7 @@ def predict(Xtest, W1,b1,W2,b2):
         x = x.T # convert to column vector
         #########################################
         ## INSERT YOUR CODE HERE
-
+        Y, P = 0
 
 
         #########################################
