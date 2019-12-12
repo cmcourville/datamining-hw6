@@ -99,6 +99,7 @@ def k_nearest_neighbor(Xtrain, Ytrain, Xtest, K = 3):
         idx = s[K-2]
         Ytest.append(Ytrain[idx])
     Ytest = np.array(Ytest)
+    
     #########################################
     return Ytest 
 
